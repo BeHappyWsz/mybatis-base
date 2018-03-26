@@ -173,4 +173,28 @@ public class MybatisTest {
 		List<User> list = userMapper.orderId(map);
 		System.out.println(list);
 	}
+	
+	/**
+	 * 事务模式：
+	 * 1.session关闭自动提交
+	 * 2.异常
+	 * 2.session异常期间的操作不进行提交
+	 */
+	@Test
+	public void transaction() {
+		SqlSession session = DBUtils.getSqlSessionFactory().openSession(false);
+		UserMapper mapper = session.getMapper(UserMapper.class);
+		int flag1 = 0;
+		int flag2 = 0;
+		try {
+			flag1 = mapper.deleteUser(userMapper.findById(53));
+			System.out.println(1/0);
+			flag2 = mapper.deleteUser(userMapper.findById(54));
+			session.commit();
+			System.out.println(flag1 +" "+flag2);
+		} catch (Exception e) {
+			System.out.println(flag1 +" "+flag2);
+			e.printStackTrace();
+		}
+	}
 }
