@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.session.RowBounds;
 
 import wsz.mybatis.entity.User;
@@ -117,4 +118,12 @@ public interface UserMapper {
 	 * @return
 	 */
 	List<User> orderId(Map<String, Object> map);
+	
+	/**
+	 * 
+	 * @param username
+	 * @return
+	 */
+	@Select("select u.id,u.username,u.password from t_user u where u.username like #{username}")
+	List<User> anno(@Param("username")String username);
 }

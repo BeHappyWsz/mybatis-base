@@ -197,4 +197,13 @@ public class MybatisTest {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * mybatis注解sql
+	 */
+	@Test
+	public void anno() {
+		List<User> list = userMapper.anno("1");
+		System.out.println(list);
+	}
 }
