@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="wsz.mybatis.dao.UserMapper">
+	
+	<sql id="baseColumn">
+		id,username,password
+	</sql>
+	
+	<insert id="addUser" parameterType="wsz.mybatis.entity.User" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+		insert into t_user(username,password)
+		values (#{username},#{password})
+	</insert>
+	
+	<insert id="batchAdd" parameterType="List">
+		insert into t_user(username,password)
+		values
+			<foreach collection="list" item="user" open="" separator="," close="">
+				(#{user.username},#{user.password})
+			</foreach>
+	</insert>
+	
+	<delete id="deleteUser" parameterType="wsz.mybatis.entity.User">
+		delete 
+		from t_user
+		where id = #{id}
+	</delete>
+	
+	<delete id="batchDelete" parameterType="java.util.List">
+		delete
+		from t_user
+		where id in 
+		(
+			<foreach collection="list" item="user" open="" separator="," close="">
+				#{user.id}
+			</foreach>
+		)
+	</delete>
+	
+	<update id="updateUser" parameterType="wsz.mybatis.entity.User">
+		update t_user
+		set 
+			<if test="username != null and username != ''">
+				username =#{username}
+			</if>
+			<if test="password != null and password !=''">
+				, <!-- sql注意分隔 -->
+				password = #{password}
+			</if>
+		where id= #{id}
+	</update>
+	
+	<select id="selectAll" resultType="wsz.mybatis.entity.User">
+		select <include refid="baseColumn"/>
+		from t_user
+	</select>
+	
+	<select id="findById" resultType="wsz.mybatis.entity.User" parameterType="int">
+		select <include refid="baseColumn"/>
+		from t_user
+		where id=#{id}
+	</select>
+	
+	<select id="findByUsername" resultType="wsz.mybatis.entity.User" parameterType="String">
+		select <include refid="baseColumn"/>
+		from t_user
+		where username like concat('%',#{username},'%')
+	</select>
+	
+	<select id="findByUsernameAndPassword" resultType="wsz.mybatis.entity.User" parameterType="String">
+		select <include refid="baseColumn"/>
+		from t_user
+		where username = #{username} and password=${password}
+	</select>
+	
+	<select id="findByUser" resultType="wsz.mybatis.entity.User" parameterType="wsz.mybatis.entity.User">
+		select <include refid="baseColumn"/>
+		from t_user
+		where username = #{username} and password=${password}
+	</select>
+	
+	<select id="sqlInjec1" resultType="wsz.mybatis.entity.User" parameterType="String">
+		select <include refid="baseColumn"/>
+		from t_user
+		where username like ${username}
+	</select>
+	
+	<select id="sqlInjec2" resultType="wsz.mybatis.entity.User" parameterType="String">
+		select <include refid="baseColumn"/>
+		from t_user
+		where username like concat('%',${username},'%')
+	</select>
+	
+	<select id="page" resultType="wsz.mybatis.entity.User">
+		select <include refid="baseColumn"/>
+		from t_user
+	</select>
+	
+	<!-- 存储过程输入&输出 -->
+	<parameterMap type="java.util.Map" id="pMap">
+		<parameter property="username" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="count"    jdbcType="INTEGER" javaType="int" mode="OUT"/>
+	</parameterMap>
+	<select id="procedure" parameterMap="pMap" statementType="CALLABLE">
+		<![CDATA[
+			{call countByName(?,?)}
+		]]>
+	</select>
+	
+	<!-- 存储过程输入&查询 -->
+	<parameterMap type="java.util.Map" id="orderIdMap">
+		<parameter property="id" jdbcType="INTEGER" javaType="int" mode="IN"/>
+	</parameterMap>
+	<select id="orderId"  parameterMap="orderIdMap" statementType="CALLABLE" resultType="wsz.mybatis.entity.User" >
+		<![CDATA[
+			{call orderId(?)}
+		]]>
+	</select>
+</mapper>
